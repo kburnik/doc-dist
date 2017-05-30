@@ -100,9 +100,9 @@ if __name__ == "__main__":
       description="Simple document distance calculation using the SSD or "
                   "cosine distance method. When specifying options, files have "
                   "priority over inline inputs.")
-  ap.add_argument("-f", "--file", type=str, nargs='*', default=None,
+  ap.add_argument("-f", "--file", type=str, nargs='*', default=[],
                   help="Two or more files to compare.")
-  ap.add_argument("-i", "--inline", type=str, nargs='*', default=None,
+  ap.add_argument("-i", "--inline", type=str, nargs='*', default=[],
                   metavar="TEXT",
                   help="Two or more inline sentences to compare.")
   ap.add_argument("-m", "--method", type=str, choices=DISTANCE_METHODS.keys(),
@@ -116,14 +116,8 @@ if __name__ == "__main__":
                   help="Display the word vectors when done.")
   args = ap.parse_args()
 
-  if args.file is not None and len(args.file) < 2:
-    ap.error("Must specify at least 2 files with -f/--file option.")
-
-  if args.inline is not None and len(args.inline) < 2:
-    ap.error("Must specify at least 2 values with -i/--inline option.")
-
-  if (args.file is None) and (args.inline is None):
-    ap.error("Must use at least one -f/--file or -i/--inline option.")
+  if (len(args.file) + len(args.inline)) < 2:
+    ap.error("Must specify at least 2 documents with -f and/or -i option.")
 
   documents = []
   if args.file:

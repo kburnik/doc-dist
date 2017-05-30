@@ -59,7 +59,7 @@ sentence day common tomorrow today nice
 ## Testing and Evaluation
 
 You can test the program on email spam messages. An example file
-spam_samples.txt is provided. Also you can use the provided examples a.txt,
+spam_samples.txt is provided. You can also use the provided examples a.txt,
 b.txt and c.txt.
 
 --
