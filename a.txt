@@ -1,2 +1,3 @@
-Today is a NICE NICE
-day.;!
+Today is a;
+    NICE
+day!

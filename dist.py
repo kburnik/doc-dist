@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import argparse
 import numpy as  np
 import os
 import re
@@ -22,7 +21,6 @@ def cosine_dist(a, b):
 DISTANCE_METHODS = {'ssd': ssd_dist, 'cos': cosine_dist}
 """Mapping of selected distance method and implementation."""
 
-
 DEFAULT_DISTANCE_METHOD = 'ssd'
 """Default distance method."""
 
@@ -35,8 +33,6 @@ def extract_words(document):
   text = re.sub(r'\s+', ' ', text)
   # Remove punctuation.
   text = text.translate(None, string.punctuation)
-  # Remove punctuation.
-  text = re.sub('[' + re.escape('.,') + ']', '', text)
   # Break into list of words.
   words = text.split(' ')
   return words
@@ -49,7 +45,7 @@ def remove_stop_words(word_list, stop_word_set):
 
 def compare_documents(documents, stop_words=[], method=DEFAULT_DISTANCE_METHOD,
                       verbose=False):
-  """Compares two or more in memory documents. The stop words are first removed
+  """Compares two or more in-memory documents. The stop words are first removed
      from the document text and the distance is computed using the provided
      method."""
   dist = DISTANCE_METHODS[method]
@@ -80,51 +76,43 @@ def compare_documents(documents, stop_words=[], method=DEFAULT_DISTANCE_METHOD,
   vectors = np.transpose(freq_map.values())
   """The word frequency vectors. Suitable for comparison."""
 
-  # Make all comparisons.
+  # Make all comparisons and yield tuples with indices and distance.
   for i in range(len(vectors) - 1):
     for j in range(i + 1, len(vectors)):
       d = dist(vectors[i], vectors[j])
       yield (i, j, d)
 
+  # Output table of vectors when using verbose mode.
   if verbose:
-    max_word_length = max([len(word) for word in distinct_words])
-    output_format_str = "%" + str(max_word_length) + "s"
-    output_format_int = "%" + str(max_word_length) + "d"
     for word in distinct_words:
-      print output_format_str % word,
+      print word,
     print ""
     for vector in vectors:
-      for value in vector:
-        print output_format_int % value,
+      for i, value in enumerate(vector):
+        output_format = "%%%dd" % len(distinct_words[i])
+        print output_format % value,
       print ""
 
 
-
 if __name__ == "__main__":
-  ap = argparse.ArgumentParser()
-  ap.add_argument("-f", "--file",
-                  type=str,
-                  nargs='*',
-                  default=None,
+  import argparse
+  ap = argparse.ArgumentParser(
+      description="Simple document distance calculation using the SSD or "
+                  "cosine distance method. When specifying options, files have "
+                  "priority over inline inputs.")
+  ap.add_argument("-f", "--file", type=str, nargs='*', default=None,
                   help="Two or more files to compare.")
-  ap.add_argument("-i", "--inline",
-                  type=str,
-                  nargs='*',
-                  default=None,
+  ap.add_argument("-i", "--inline", type=str, nargs='*', default=None,
                   metavar="TEXT",
                   help="Two or more inline sentences to compare.")
-  ap.add_argument("-m", "--method",
-                  type=str,
-                  choices=DISTANCE_METHODS.keys(),
+  ap.add_argument("-m", "--method", type=str, choices=DISTANCE_METHODS.keys(),
                   default=DEFAULT_DISTANCE_METHOD,
                   help="Method for distance computation.")
-  ap.add_argument("-s", "--stop_word_file",
-                  type=str,
+  ap.add_argument("-s", "--stop_word_file", type=str,
                   default="stop-word-list.txt",
-                  help="Path to the stop word list file.")
-  ap.add_argument("-v", "--verbose",
-                  default=False,
-                  action="store_true",
+                  help="Path to the stop word list file with each word in a "
+                       "single line.")
+  ap.add_argument("-v", "--verbose", default=False, action="store_true",
                   help="Display the word vectors when done.")
   args = ap.parse_args()
 
@@ -134,36 +122,23 @@ if __name__ == "__main__":
   if args.inline is not None and len(args.inline) < 2:
     ap.error("Must specify at least 2 values with -i/--inline option.")
 
-  documents = None
+  if (args.file is None) and (args.inline is None):
+    ap.error("Must use at least one -f/--file or -i/--inline option.")
 
+  documents = []
   if args.file:
-    documents = []
     for file in args.file:
-      if not os.path.exists(file):
-        raise Exception("File does not exist: %s" % file)
-
       with open(file, "r") as f:
         documents.append(f.read().strip())
-  elif args.inline:
-    documents = args.inline
 
-  if not os.path.exists(args.stop_word_file):
-    raise Exception("Stop word file does not exist: %s" % args.stop_word_file)
+  if args.inline:
+    documents += args.inline
 
   with open(args.stop_word_file, "r") as f:
     stop_words = [word.rstrip() for word in f]
 
-  if documents is None:
-    ap.print_help()
-    ap.exit(1)
-
   results = compare_documents(documents, stop_words, args.method, args.verbose)
 
   for i, j, d in results:
-    print "Comparing documents %d and %d. %s distance = %.4lf" % \
+    print "Comparing documents %d and %d. The %s distance is %.4lf" % \
         (i + 1, j + 1, args.method, d)
-
-
-
-
-

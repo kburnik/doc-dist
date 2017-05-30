@@ -30,7 +30,7 @@ pip install -r requirements.txt
 * to use cosine distance, use the `-m cos` option
 * to output the computed vectors, use the `-v` option for verbosity
 * to specify different stop-words file, use the `-s path_to_file` option
-
+* you can combine files and inline inputs (files are indexed before inlines)
 
 ## Sample run
 
@@ -47,19 +47,19 @@ pip install -r requirements.txt
 Sample output
 
 ```
-Comparing documents 1 and 2. cos distance = 0.3333
-Comparing documents 1 and 3. cos distance = 1.0000
-Comparing documents 2 and 3. cos distance = 1.0000
-sentence      day   common tomorrow    today     nice
-       0        1        0        0        1        1
-       0        1        0        1        0        1
-       1        0        1        0        0        0
+Comparing documents 1 and 2. The cos distance is 0.3333
+Comparing documents 1 and 3. The cos distance is 1.0000
+Comparing documents 2 and 3. The cos distance is 1.0000
+sentence day common tomorrow today nice
+       0   1      0        0     1    1
+       0   1      0        1     0    1
+       1   0      1        0     0    0
 ```
 
 ## Testing and Evaluation
 
 You can test the program on email spam messages. An example file
-spam_samples.txt is provided. Also you can use the provided examples a.txt
+spam_samples.txt is provided. Also you can use the provided examples a.txt,
 b.txt and c.txt.
 
 --
